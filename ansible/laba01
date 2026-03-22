@@ -1,0 +1,58 @@
+Домашнее задание: Ansible setup модуль
+
+Выполненные команды:
+
+1. Проверка доступности машин:
+ansible all -i inventory.ini -m ping
+
+2. Сбор фактов с основной машины:
+ansible localhost -m setup | grep -E "(ansible_all_ipv4_addresses|ansible_board_name|ansible_board_vendor|ansible_fqdn|ansible_os_family|ansible_uptime_seconds|ansible_user_id)"
+
+3. Сбор фактов с тестовых машин:
+ansible test -i inventory.ini -m setup | grep -E "(ansible_all_ipv4_addresses|ansible_board_name|ansible_board_vendor|ansible_fqdn|ansible_os_family|ansible_uptime_seconds|ansible_user_id)"
+
+=== Результаты ===
+
+=== Факты с основной машины (vTestPC001) ===
+        "ansible_all_ipv4_addresses": [
+        "ansible_board_name": "VirtualBox",
+        "ansible_board_vendor": "Oracle Corporation",
+        "ansible_fqdn": "vTestPC001",
+        "ansible_os_family": "Debian",
+        "ansible_uptime_seconds": 2498,
+        "ansible_user_id": "tserg",
+
+=== Факты с тестовых машин (10.0.47.20, 10.0.47.101, 10.0.47.102) ===
+        "ansible_all_ipv4_addresses": [
+        "ansible_board_name": "VirtualBox",
+        "ansible_board_vendor": "Oracle Corporation",
+        "ansible_fqdn": "vTestPC101.home.local",                                                                                                      
+        "ansible_os_family": "Debian",                                                                                                                
+        "ansible_uptime_seconds": 2498,                                                                                                               
+        "ansible_user_id": "tserg",                                                                                                                   
+        "ansible_all_ipv4_addresses": [                                                                                                               
+        "ansible_board_name": "VirtualBox",                                                                                                           
+        "ansible_board_vendor": "Oracle Corporation",                                                                                                 
+        "ansible_fqdn": "vTestPC102.home.local",
+        "ansible_os_family": "Debian",
+        "ansible_uptime_seconds": 2511,
+        "ansible_user_id": "tserg",
+        "ansible_all_ipv4_addresses": [
+        "ansible_board_name": "VirtualBox",
+        "ansible_board_vendor": "Oracle Corporation",
+        "ansible_fqdn": "vTestPC002.home.local",
+        "ansible_os_family": "Debian",
+        "ansible_uptime_seconds": 2500,
+        "ansible_user_id": "tserg",
+
+=== Используемый inventory файл ===
+[test]
+10.0.47.101 ansible_user=tserg ansible_ssh_pass=1213_tserg
+10.0.47.102 ansible_user=tserg ansible_ssh_pass=1213_tserg
+10.0.47.20 ansible_user=tserg ansible_ssh_pass=1213_tserg
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+host_key_checking=False
+
+=== Конец отчета ===
