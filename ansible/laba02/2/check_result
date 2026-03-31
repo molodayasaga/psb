@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+Server: nginx/1.28.2
+Date: Tue, 31 Mar 2026 09:50:00 GMT
+Content-Type: text/html
+Content-Length: 10703
+Last-Modified: Sun, 15 Feb 2026 19:45:01 GMT
+Connection: keep-alive
+ETag: "6992223d-29cf"
+X-Frame-Options: SAMEORIGIN
+X-Custom-Header: TestAnsiblePlaybook
+Accept-Ranges: bytes
