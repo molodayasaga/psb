@@ -1,1 +1,40 @@
+---
+- name: Сбор информации о хостах
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: Вывод информации о ПК
+      debug:
+        msg:
+          - "Хост:    {{ inventory_hostname }}"
+          - "FQDN:    {{ ansible_fqdn }}"
+          - "Версия Ansible:    {{ ansible_version.string }}"
+          - "Конфиг:    /etc/ansible/config.yml"
+          - "Дата/время:    {{ ansible_date_time.iso8601 }}"
+          - "Пользователь:    {{ ansible_user_id }}"
+          - "Версия ОС:    {{ ansible_distribution }} {{ ansible_distribution_version }} ({{ ansible_distribution_release }})"
+          - "Семейство ОС:    {{ ansible_os_family }}"
+          - "RAM:    {{ ansible_memtotal_mb }}"
+          - "ip адрес:    {{ ansible_all_ipv4_addresses }}"
+          - "Время работы:    {{ (ansible_uptime_seconds // 86400) }} дней {{ ((ansible_uptime_seconds % 86400) // 3600) }} часов {{ ((ansible_uptime_seconds % 3600) // 60) }} минут"
 
+    - name: Сохранение информации в файл
+      copy:
+        content: |
+          Информация о ПК
+          __________________
+          Хост:    {{ inventory_hostname }}
+          FQDN:    {{ ansible_fqdn }}
+          Версия Ansible:    {{ ansible_version.string }}
+          Конфиг:    /etc/ansible/config.yml
+          Дата/время:    {{ ansible_date_time.iso8601 }}
+          Пользователь:    {{ ansible_user_id }}
+          Версия ОС:    {{ ansible_distribution }} {{ ansible_distribution_version }} ({{ ansible_distribution_release }})
+          Семейство ОС:    {{ ansible_os_family }}
+          RAM:    {{ ansible_memtotal_mb }}
+          ip адрес:    {{ ansible_all_ipv4_addresses }}
+          Время работы:    {{ (ansible_uptime_seconds // 86400) }} дней {{ ((ansible_uptime_seconds % 86400) // 3600) }} часов {{ ((ansible_uptime_seconds % 3600) // 60) }} минут
+          __________________
+        dest: "./facts_{{ inventory_hostname }}.txt"
+      delegate_to: localhost
+      run_once: true
