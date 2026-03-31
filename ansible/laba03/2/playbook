@@ -1,0 +1,84 @@
+---
+- name: Проверка настроек подключения к AD
+  hosts: test
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Проверка наличия krb5.conf
+      stat:
+        path: /etc/krb5.conf
+      register: krb5_file
+
+    - name: Проверка настроек Kerberos если файл существует
+      shell: |
+        grep -E "default_etypes\s*=\s*aes128-cts-hmac-sha1-96,\s*aes256-cts-hmac-sha1-96" /etc/krb5.conf && \
+        grep -E "default_as_etypes\s*=\s*aes128-cts-hmac-sha1-96,\s*aes256-cts-hmac-sha1-96" /etc/krb5.conf && \
+        grep -E "default_tgs_etypes\s*=\s*aes128-cts-hmac-sha1-96,\s*aes256-cts-hmac-sha1-96" /etc/krb5.conf
+      register: krb5_check
+      ignore_errors: yes
+      when: krb5_file.stat.exists
+
+    - name: Проверка наличия sssd.conf
+      stat:
+        path: /etc/sssd/sssd.conf
+      register: sssd_file
+
+    - name: Поиск sssd конфигов в conf.d
+      find:
+        paths: /etc/sssd/conf.d
+        patterns: "*.conf"
+      register: sssd_conf_files
+      ignore_errors: yes
+
+    - name: Проверка cache_credentials если файлы существуют
+      shell: |
+        grep -i "cache_credentials\s*=\s*False" /etc/sssd/sssd.conf 2>/dev/null || \
+        grep -i "cache_credentials\s*=\s*False" /etc/sssd/conf.d/*.conf 2>/dev/null
+      register: cache_check
+      ignore_errors: yes
+      when: sssd_file.stat.exists or sssd_conf_files.matched > 0
+
+    - name: Проверка fallback_homedir с доменом
+      shell: |
+        grep -E "fallback_homedir\s*=\s*/home/%u@%d" /etc/sssd/sssd.conf 2>/dev/null || \
+        grep -E "fallback_homedir\s*=\s*/home/%u@%d" /etc/sssd/conf.d/*.conf 2>/dev/null
+      register: homedir_check
+      ignore_errors: yes
+      when: sssd_file.stat.exists or sssd_conf_files.matched > 0
+
+    - name: Сохранение результата проверки AD
+      copy:
+        content: |
+          Проверка настроек подключения к AD
+          ===================================
+          
+          1. Проверка Kerberos (/etc/krb5.conf):
+          {% if not krb5_file.stat.exists %}
+          [INFO] Файл /etc/krb5.conf не найден (на тестовом стенде это нормально)
+          {% elif krb5_check.rc == 0 %}
+          [OK] Настройки Kerberos корректны
+          {% else %}
+          [FAIL] Настройки Kerberos не соответствуют требованиям
+          {% endif %}
+          
+          2. Проверка cache_credentials = False:
+          {% if not sssd_file.stat.exists and sssd_conf_files.matched == 0 %}
+          [INFO] Файлы sssd.conf не найдены (SSSD не настроен)
+          {% elif cache_check.rc == 0 %}
+          [OK] cache_credentials = False настроен
+          {% else %}
+          [FAIL] cache_credentials = False не найден
+          {% endif %}
+          
+          3. Проверка fallback_homedir с доменом (%d):
+          {% if not sssd_file.stat.exists and sssd_conf_files.matched == 0 %}
+          [INFO] Файлы sssd.conf не найдены (SSSD не настроен)
+          {% elif homedir_check.rc == 0 %}
+          [OK] fallback_homedir содержит домен (%d)
+          {% else %}
+          [FAIL] fallback_homedir не содержит домен (%d)
+          {% endif %}
+        dest: "./ad_result.txt"
+      delegate_to: localhost
+      run_once: true
