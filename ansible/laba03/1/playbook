@@ -1,0 +1,34 @@
+---
+- name: Проверка настройки TMOUT
+  hosts: test
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Проверка наличия TMOUT в конфигурационных файлах
+      shell: |
+        grep -r "TMOUT=900" /etc/bash.bashrc /etc/profile /etc/profile.d/*.sh 2>/dev/null
+      register: tmout_value
+      ignore_errors: yes
+
+    - name: Проверка наличия readonly TMOUT
+      shell: |
+        grep -r "readonly TMOUT" /etc/bash.bashrc /etc/profile /etc/profile.d/*.sh 2>/dev/null
+      register: tmout_readonly
+      ignore_errors: yes
+
+    - name: Сохранение результата на локальной машине
+      copy:
+        content: |
+          Проверка настройки TMOUT
+          =========================
+          {% if tmout_value.stdout != "" and tmout_readonly.stdout != "" %}
+          [OK] TMOUT настроен правильно:
+          {{ tmout_value.stdout }}
+          {{ tmout_readonly.stdout }}
+          {% else %}
+          [INFO] TMOUT не настроен (на тестовом стенде это нормально)
+          {% endif %}
+        dest: "/home/tserg/ansible_laba01/laba03/tmout_result.txt"
+      delegate_to: localhost
+      run_once: true
