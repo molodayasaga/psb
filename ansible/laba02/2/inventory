@@ -1,0 +1,11 @@
+[test]
+10.0.47.101 ansible_user=tserg
+10.0.47.102 ansible_user=tserg
+10.0.47.20 ansible_user=tserg
+
+[main]
+localhost ansible_connection=local
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+host_key_checking=False
