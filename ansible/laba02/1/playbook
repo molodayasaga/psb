@@ -38,3 +38,76 @@
         dest: "./facts_{{ inventory_hostname }}.txt"
       delegate_to: localhost
       run_once: true
+---
+
+PLAY [Сбор информации о хостах] ************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [localhost]
+ok: [10.0.47.102]
+[ERROR]: Task failed: Failed to connect to the host via ssh: ssh: connect to host 10.0.47.101 port 22: No route to host
+fatal: [10.0.47.101]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: ssh: connect to host 10.0.47.101 port 22: No route to host", "unreachable": true}
+[ERROR]: Task failed: Failed to connect to the host via ssh: ssh: connect to host 10.0.47.20 port 22: No route to host
+fatal: [10.0.47.20]: UNREACHABLE! => {"changed": false, "msg": "Task failed: Failed to connect to the host via ssh: ssh: connect to host 10.0.47.20 port 22: No route to host", "unreachable": true}
+
+TASK [Вывод информации о ПК] ***************************************************
+[WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+[DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
+Origin: /home/tserg/ansible_laba01/laba02/gather_facts.yml:10:13
+
+ 8         msg:
+ 9           - "Хост:    {{ inventory_hostname }}"
+10           - "FQDN:    {{ ansible_fqdn }}"
+               ^ column 13
+
+Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
+
+ok: [10.0.47.102] => {
+    "msg": [
+        "Хост:    10.0.47.102",
+        "FQDN:    vTestPC102.home.local",
+        "Версия Ansible:    2.20.3",
+        "Конфиг:    /etc/ansible/config.yml",
+        "Дата/время:    2026-03-31T09:50:28Z",
+        "Пользователь:    tserg",
+        "Версия ОС:    Kali 2026.1 (kali-rolling)",
+        "Семейство ОС:    Debian",
+        "RAM:    1971",
+        "ip адрес:    ['10.0.47.102', '10.0.47.8']",
+        "Время работы:    0 дней 1 часов 37 минут"
+    ]
+}
+ok: [localhost] => {
+    "msg": [
+        "Хост:    localhost",
+        "FQDN:    vTestPC001",
+        "Версия Ansible:    2.20.3",
+        "Конфиг:    /etc/ansible/config.yml",
+        "Дата/время:    2026-03-31T09:50:28Z",
+        "Пользователь:    tserg",
+        "Версия ОС:    Kali 2026.1 (kali-rolling)",
+        "Семейство ОС:    Debian",
+        "RAM:    1971",
+        "ip адрес:    ['10.0.47.10']",
+        "Время работы:    0 дней 1 часов 37 минут"
+    ]
+}
+
+TASK [Сохранение информации в файл] ********************************************
+[DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
+Origin: /home/tserg/ansible_laba01/laba02/gather_facts.yml:23:18
+
+21     - name: Сохранение информации в файл
+22       copy:
+23         content: |
+                    ^ column 18
+
+Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
+
+changed: [10.0.47.102 -> localhost]
+
+PLAY RECAP *********************************************************************
+10.0.47.101                : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+10.0.47.102                : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+10.0.47.20                 : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
