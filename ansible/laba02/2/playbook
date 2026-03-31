@@ -1,1 +1,106 @@
+---
+- name: Установка и настройка nginx на тестовой машине
+  hosts: 10.0.47.102
+  become: yes
+  gather_facts: yes
 
+  tasks:
+    - name: Обновление кэша пакетов
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Установка nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Создание резервной копии конфигурации
+      copy:
+        src: /etc/nginx/nginx.conf
+        dest: /etc/nginx/nginx.conf.backup
+        remote_src: yes
+        backup: yes
+
+    - name: Удаление дефолтного сайта nginx
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: restart nginx
+
+    - name: Создание новой конфигурации из шаблона
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/nginx.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: restart nginx
+
+    - name: Проверка конфигурации nginx
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+
+    - name: Вывод результата проверки конфигурации
+      debug:
+        msg: "{{ nginx_test.stdout_lines }}"
+
+    - name: Запуск и включение nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: restart nginx
+      systemd:
+        name: nginx
+        state: restarted
+
+---
+
+PLAY [Установка и настройка nginx на тестовой машине] **************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [10.0.47.102]
+
+TASK [Обновление кэша пакетов] *************************************************
+[WARNING]: Deprecation warnings can be disabled by setting `deprecation_warnings=False` in ansible.cfg.
+[DEPRECATION WARNING]: INJECT_FACTS_AS_VARS default to `True` is deprecated, top-level facts will not be auto injected after the change. This feature will be removed from ansible-core version 2.24.
+Origin: /home/tserg/ansible_laba01/laba02/install_nginx.yml:11:13
+
+ 9       apt:
+10         update_cache: yes
+11       when: ansible_os_family == "Debian"
+               ^ column 13
+
+Use `ansible_facts["fact_name"]` (no `ansible_` prefix) instead.
+
+ok: [10.0.47.102]
+
+TASK [Установка nginx] *********************************************************
+ok: [10.0.47.102]
+
+TASK [Создание резервной копии конфигурации] ***********************************
+ok: [10.0.47.102]
+
+TASK [Удаление дефолтного сайта nginx] *****************************************
+ok: [10.0.47.102]
+
+TASK [Создание новой конфигурации из шаблона] **********************************
+ok: [10.0.47.102]
+
+TASK [Проверка конфигурации nginx] *********************************************
+ok: [10.0.47.102]
+
+TASK [Вывод результата проверки конфигурации] **********************************
+ok: [10.0.47.102] => {
+    "msg": []
+}
+
+TASK [Запуск и включение nginx] ************************************************
+ok: [10.0.47.102]
+
+PLAY RECAP *********************************************************************
+10.0.47.102                : ok=9    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0 
