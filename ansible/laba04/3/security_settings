@@ -1,0 +1,59 @@
+---
+- name: Проверка настроек безопасности
+  hosts: test
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Получение UMASK из /etc/login.defs
+      shell: grep "^UMASK" /etc/login.defs 2>/dev/null || echo "UMASK не найден"
+      register: umask_login
+      changed_when: false
+
+    - name: Проверка скрипта orgnm.sh
+      stat:
+        path: /etc/profile.d/orgnm.sh
+      register: orgnm_file
+
+    - name: Получение содержимого orgnm.sh
+      shell: cat /etc/profile.d/orgnm.sh 2>/dev/null || echo "Файл отсутствует"
+      register: orgnm_content
+      changed_when: false
+      when: orgnm_file.stat.exists
+
+    - name: Получение DIR_MODE из /etc/adduser.conf
+      shell: grep "^DIR_MODE" /etc/adduser.conf 2>/dev/null || echo "DIR_MODE не найден"
+      register: dir_mode
+      changed_when: false
+
+    - name: Проверка прав на /var/log
+      shell: find /var/log -type f -exec stat -c "%a %n" {} \; 2>/dev/null | head -20
+      register: var_log_perms
+      changed_when: false
+
+    - name: Сохранение результата
+      copy:
+        content: |
+          Проверка настроек безопасности
+          ================================
+          
+          1. UMASK в /etc/login.defs:
+          {{ umask_login.stdout }}
+          
+          2. Скрипт /etc/profile.d/orgnm.sh:
+          {% if orgnm_file.stat.exists %}
+          [OK] Файл существует
+          Содержимое:
+          {{ orgnm_content.stdout | default('') }}
+          {% else %}
+          [INFO] Файл /etc/profile.d/orgnm.sh отсутствует
+          {% endif %}
+          
+          3. DIR_MODE в /etc/adduser.conf:
+          {{ dir_mode.stdout }}
+          
+          4. Права на /var/log (первые 20 файлов):
+          {{ var_log_perms.stdout }}
+        dest: "/home/tserg/ansible_laba01/laba04/security_result.txt"
+      delegate_to: localhost
+      run_once: true
