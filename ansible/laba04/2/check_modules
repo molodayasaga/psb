@@ -1,0 +1,27 @@
+---
+- name: Проверка отключения модулей файловых систем
+  hosts: test
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Проверка загруженных модулей
+      shell: |
+        for fs in cramfs freevxfs jffs2 hfs hfsplus squashfs; do
+          if lsmod | grep -q "^$fs"; then
+            echo "⚠️ $fs - ЗАГРУЖЕН"
+          else
+            echo "✅ $fs - ОТКЛЮЧЕН"
+          fi
+        done
+      register: modules_check
+
+    - name: Сохранение результата
+      copy:
+        content: |
+          Проверка модулей файловых систем
+          =================================
+          {{ modules_check.stdout }}
+        dest: "/home/tserg/ansible_laba01/laba04/modules_result.txt"
+      delegate_to: localhost
+      run_once: true
