@@ -1,0 +1,33 @@
+Проверка настроек безопасности
+================================
+
+1. UMASK в /etc/login.defs:
+UMASK не найден
+
+2. Скрипт /etc/profile.d/orgnm.sh:
+[INFO] Файл /etc/profile.d/orgnm.sh отсутствует
+
+3. DIR_MODE в /etc/adduser.conf:
+DIR_MODE не найден
+
+4. Права на /var/log (первые 20 файлов):
+600 /var/log/lightdm/lightdm.log.old
+600 /var/log/lightdm/lightdm.log
+600 /var/log/lightdm/seat0-greeter.log.old
+600 /var/log/lightdm/x-0.log.old
+600 /var/log/lightdm/seat0-greeter.log
+600 /var/log/lightdm/x-0.log
+660 /var/log/btmp.1
+644 /var/log/macchanger.log.2.gz
+644 /var/log/stunnel4/stunnel.log
+644 /var/log/apt/history.log
+644 /var/log/apt/eipp.log.xz
+640 /var/log/apt/term.log
+640 /var/log/apt/term.log.1.gz
+644 /var/log/apt/history.log.1.gz
+644 /var/log/macchanger.log.1.gz
+644 /var/log/dpkg.log
+644 /var/log/alternatives.log.1
+644 /var/log/wtmp.db
+600 /var/log/boot.log.3
+644 /var/log/alternatives.log
