@@ -1,0 +1,73 @@
+---
+- name: Проверка неактивных служб
+  hosts: test
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Получение статуса всех служб
+      service_facts:
+
+    - name: Список служб для проверки
+      set_fact:
+        services_to_check:
+          - autofs
+          - avahi-daemon
+          - dhcpd
+          - dnsmasq
+          - vsftpd
+          - proftpd
+          - pure-ftpd
+          - slapd
+          - nfs-server
+          - rpcbind
+          - ypserv
+          - cups
+          - smbd
+          - nmbd
+          - snmpd
+          - tftpd-hpa
+          - apache2
+          - nginx
+          - xinetd
+          - postfix
+          - sendmail
+
+    - name: Проверка статуса каждой службы
+      debug:
+        msg: |
+          {% set service = item %}
+          {% set status = ansible_facts.services[service] if service in ansible_facts.services else 'not_installed' %}
+          {% if status == 'not_installed' %}
+          [OK] {{ service }} - не установлена
+          {% elif status.state == 'stopped' or status.state == 'inactive' %}
+          [OK] {{ service }} - не активна (статус: {{ status.state }})
+          {% elif status.state == 'running' %}
+          [WARN] {{ service }} - АКТИВНА (статус: {{ status.state }})
+          {% else %}
+          [INFO] {{ service }} - статус: {{ status.state }}
+          {% endif %}
+      loop: "{{ services_to_check }}"
+      loop_control:
+        label: "{{ item }}"
+
+    - name: Сохранение результата
+      copy:
+        content: |
+          Проверка неактивных служб
+          ===========================
+          {% for service in services_to_check %}
+          {% set status = ansible_facts.services[service] if service in ansible_facts.services else 'not_installed' %}
+          {% if status == 'not_installed' %}
+          [OK] {{ service }} - не установлена
+          {% elif status.state == 'stopped' or status.state == 'inactive' %}
+          [OK] {{ service }} - не активна (статус: {{ status.state }})
+          {% elif status.state == 'running' %}
+          [WARN] {{ service }} - АКТИВНА (статус: {{ status.state }})
+          {% else %}
+          [INFO] {{ service }} - статус: {{ status.state }}
+          {% endif %}
+          {% endfor %}
+        dest: "/home/tserg/ansible_laba01/laba05/services_result.txt"
+      delegate_to: localhost
+      run_once: true
