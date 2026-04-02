@@ -1,0 +1,138 @@
+---
+- name: Проверка параметров безопасности ядра (Уменьшение периметра атаки)
+  hosts: test
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    # 1. vsyscall=none (через /proc/cmdline)
+    - name: Проверка vsyscall
+      shell: cat /proc/cmdline | grep -o "vsyscall=none"
+      register: vsyscall_check
+      ignore_errors: yes
+
+    # 2. kernel.perf_event_paranoid = 3
+    - name: Проверка perf_event_paranoid
+      shell: sysctl -n kernel.perf_event_paranoid 2>/dev/null || echo "not_found"
+      register: perf_check
+      ignore_errors: yes
+
+    # 3. debugs=no-mount
+    - name: Проверка debugs
+      shell: cat /proc/cmdline | grep -o "debugs=no-mount"
+      register: debugs_check
+      ignore_errors: yes
+
+    # 4. kernel.kexec_load_disabled = 1
+    - name: Проверка kexec_load_disabled
+      shell: sysctl -n kernel.kexec_load_disabled 2>/dev/null || echo "not_found"
+      register: kexec_check
+      ignore_errors: yes
+
+    # 5. user.max_user_namespaces = 0
+    - name: Проверка max_user_namespaces
+      shell: sysctl -n user.max_user_namespaces 2>/dev/null || echo "not_found"
+      register: userns_check
+      ignore_errors: yes
+
+    # 6. kernel.unprivileged_bpf_disable = 1
+    - name: Проверка unprivileged_bpf_disable
+      shell: sysctl -n kernel.unprivileged_bpf_disable 2>/dev/null || echo "not_found"
+      register: bpf_check
+      ignore_errors: yes
+
+    # 7. vm.unprivileged_userfaultfd = 0
+    - name: Проверка unprivileged_userfaultfd
+      shell: sysctl -n vm.unprivileged_userfaultfd 2>/dev/null || echo "not_found"
+      register: uffd_check
+      ignore_errors: yes
+
+    # 8. dev.tty.ldisc_autoload = 0
+    - name: Проверка ldisc_autoload
+      shell: sysctl -n dev.tty.ldisc_autoload 2>/dev/null || echo "not_found"
+      register: ldisc_check
+      ignore_errors: yes
+
+    # 9. tsx=off
+    - name: Проверка tsx
+      shell: cat /proc/cmdline | grep -o "tsx=off"
+      register: tsx_check
+      ignore_errors: yes
+
+    # 10. vm.mmap_min_addr = 4096
+    - name: Проверка mmap_min_addr
+      shell: sysctl -n vm.mmap_min_addr 2>/dev/null || echo "not_found"
+      register: mmap_check
+      ignore_errors: yes
+
+    # 11. kernel.randomize_va_space = 2
+    - name: Проверка randomize_va_space
+      shell: sysctl -n kernel.randomize_va_space 2>/dev/null || echo "not_found"
+      register: aslr_check
+      ignore_errors: yes
+
+    # Сохранение результата
+    - name: Сохранение результата проверки
+      copy:
+        content: |
+          Проверка параметров безопасности ядра
+          Раздел: Уменьшение периметра атаки ядра Linux
+          ===============================================
+          
+          1. vsyscall=none (отключение устаревшего интерфейса)
+             {% if vsyscall_check.rc == 0 %}✅ Установлено: vsyscall=none
+             {% else %}❌ НЕ установлено (текущее: {{ vsyscall_check.stdout | default('не найдено') }})
+             {% endif %}
+          
+          2. kernel.perf_event_paranoid = 3 (ограничение доступа к событиям производительности)
+             {% if perf_check.stdout == '3' %}✅ Установлено: 3
+             {% else %}❌ Текущее значение: {{ perf_check.stdout | default('не найдено') }} (должно быть 3)
+             {% endif %}
+          
+          3. debugs=no-mount (отключение монтирования debugs)
+             {% if debugs_check.rc == 0 %}✅ Установлено: debugs=no-mount
+             {% else %}❌ НЕ установлено
+             {% endif %}
+          
+          4. kernel.kexec_load_disabled = 1 (отключение kexec_load)
+             {% if kexec_check.stdout == '1' %}✅ Установлено: 1
+             {% else %}❌ Текущее значение: {{ kexec_check.stdout | default('не найдено') }} (должно быть 1)
+             {% endif %}
+          
+          5. user.max_user_namespaces = 0 (ограничение пространств имен пользователей)
+             {% if userns_check.stdout == '0' %}✅ Установлено: 0
+             {% else %}❌ Текущее значение: {{ userns_check.stdout | default('не найдено') }} (должно быть 0)
+             {% endif %}
+          
+          6. kernel.unprivileged_bpf_disable = 1 (запрет bpf для непривилегированных)
+             {% if bpf_check.stdout == '1' %}✅ Установлено: 1
+             {% else %}❌ Текущее значение: {{ bpf_check.stdout | default('не найдено') }} (должно быть 1)
+             {% endif %}
+          
+          7. vm.unprivileged_userfaultfd = 0 (запрет userfaultfd для непривилегированных)
+             {% if uffd_check.stdout == '0' %}✅ Установлено: 0
+             {% else %}❌ Текущее значение: {{ uffd_check.stdout | default('не найдено') }} (должно быть 0)
+             {% endif %}
+          
+          8. dev.tty.ldisc_autoload = 0 (запрет автозагрузки модулей терминальной дисциплины)
+             {% if ldisc_check.stdout == '0' %}✅ Установлено: 0
+             {% else %}❌ Текущее значение: {{ ldisc_check.stdout | default('не найдено') }} (должно быть 0)
+             {% endif %}
+          
+          9. tsx=off (отключение TSX)
+             {% if tsx_check.rc == 0 %}✅ Установлено: tsx=off
+             {% else %}❌ НЕ установлено
+             {% endif %}
+          
+          10. vm.mmap_min_addr = 4096 (минимальный адрес mmap)
+              {% if mmap_check.stdout == '4096' %}✅ Установлено: 4096
+              {% else %}❌ Текущее значение: {{ mmap_check.stdout | default('не найдено') }} (должно быть 4096)
+              {% endif %}
+          
+          11. kernel.randomize_va_space = 2 (рандомизация адресного пространства)
+              {% if aslr_check.stdout == '2' %}✅ Установлено: 2
+              {% else %}❌ Текущее значение: {{ aslr_check.stdout | default('не найдено') }} (должно быть 2)
+              {% endif %}
+        dest: "/home/tserg/ansible_laba01/laba05/kernel_result.txt"
+      delegate_to: localhost
+      run_once: true
