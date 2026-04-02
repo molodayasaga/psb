@@ -1,0 +1,23 @@
+Проверка неактивных служб
+===========================
+[OK] autofs - не установлена
+[OK] avahi-daemon - не установлена
+[OK] dhcpd - не установлена
+[OK] dnsmasq - не установлена
+[OK] vsftpd - не установлена
+[OK] proftpd - не установлена
+[OK] pure-ftpd - не установлена
+[OK] slapd - не установлена
+[OK] nfs-server - не установлена
+[OK] rpcbind - не активна (статус: stopped)
+[OK] ypserv - не установлена
+[OK] cups - не установлена
+[OK] smbd - не активна (статус: stopped)
+[OK] nmbd - не активна (статус: stopped)
+[OK] snmpd - не активна (статус: stopped)
+[OK] tftpd-hpa - не установлена
+[OK] apache2 - не активна (статус: stopped)
+[WARN] nginx - АКТИВНА (статус: running)
+[OK] xinetd - не установлена
+[OK] postfix - не установлена
+[OK] sendmail - не установлена
