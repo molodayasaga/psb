@@ -1,0 +1,3 @@
+-w /etc/ssh/sshd_config -p wa -k sshd_config_modify
+-a always,exit -F arch=b64 -S chmod,fchmod,chown,fchown,lchown -F key=file_permission_changes
+-a always,exit -S execve -F euid=0 -F key=admin_commands
