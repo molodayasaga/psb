@@ -1,0 +1,2 @@
+/etc/postgresql/17/main/postgresql.conf:port = 5433                             # (change requires restart)
+/etc/postgresql/18/main/postgresql.conf:port = 5452                             # (change requires restart)  
