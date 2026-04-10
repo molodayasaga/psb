@@ -1,0 +1,13 @@
+                                                       Список баз данных
+    Имя    | Владелец | Кодировка | Провайдер локали | LC_COLLATE  |  LC_CTYPE   | Локаль | Правила ICU |     Права доступа     
+-----------+----------+-----------+------------------+-------------+-------------+--------+-------------+-----------------------
+ postgres  | postgres | UTF8      | libc             | ru_RU.UTF-8 | ru_RU.UTF-8 |        |             | 
+ secure_db | postgres | UTF8      | libc             | ru_RU.UTF-8 | ru_RU.UTF-8 |        |             | =Tc/postgres         +
+           |          |           |                  |             |             |        |             | postgres=CTc/postgres+
+           |          |           |                  |             |             |        |             | readers=c/postgres
+ template0 | postgres | UTF8      | libc             | ru_RU.UTF-8 | ru_RU.UTF-8 |        |             | =c/postgres          +
+           |          |           |                  |             |             |        |             | postgres=CTc/postgres
+ template1 | postgres | UTF8      | libc             | ru_RU.UTF-8 | ru_RU.UTF-8 |        |             | =c/postgres          +
+           |          |           |                  |             |             |        |             | postgres=CTc/postgres
+(4 строки)
+
