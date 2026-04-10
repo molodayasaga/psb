@@ -1,0 +1,5 @@
+ current_user | session_user 
+--------------+--------------
+ user01       | user01
+(1 строка)
+
