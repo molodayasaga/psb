@@ -1,0 +1,2 @@
+tcp        0      0 127.0.0.1:5452          0.0.0.0:*               LISTEN      14907/postgres      
+tcp6       0      0 ::1:5452                :::*                    LISTEN      14907/postgres     
